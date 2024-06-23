@@ -82,6 +82,19 @@ Description:
 `config_init` will allocate memory for the current structure and returns a pointer to it. This `needs to be freed` and the config_cleanup function is used to free the previous allocated ressources when there is no need anymore.
 
 ### Example
+`test.ini`:
+```ini
+# -- confparse test file
+# Comments can be defined using a hashtag
+
+[Client]
+ip = "127.0.0.1" 
+port=5003 
+
+[Host]
+OS = "Windows" 
+``` 
+
 `test.c`:
 ```C
 #include "../confparse/confparse.h"
@@ -120,18 +133,11 @@ int main(void)
 }
 ```
 
-`test.ini`:
-```ini
-# -- confparse test file
-# Comments can be defined using a hashtag
-
-[Client]
-ip = "127.0.0.1" 
-port=5003 
-
-[Host]
-OS = "Windows" 
-``` 
+`Testfile output`:
+```
+OK
+category: Client, entry: ip, value: 127.0.0.1
+```
 
 ### License
 
