@@ -45,7 +45,6 @@ static int count_lines(const char *filename)
 static void remove_space(char *str)
 {
 	char *src = str, *dest = str;
-
 	while (*src != '\0')
 	{
 		if (*src != ' ')
@@ -70,25 +69,22 @@ static void ignore_comment(char *str)
 		*pos = '\0';
 }
 
-static config_t tokenize(char *line)
+static config_t tokenize(char *line, const char *current_category)
 {
 	size_t buff_size = 128;
-	char category[buff_size], key[buff_size], value[buff_size];
+	char key[buff_size], value[buff_size];
 	char *delim = "=";
 
-	memset(category, 0, buff_size);
 	memset(key, 0, buff_size);
 	memset(value, 0, buff_size);
 
 	// Check if the line is a category header
 	if (line[0] == '[' && strchr(line, ']') != NULL)
 	{
-		// Extract category name
-		strncpy(category, line + 1, strchr(line, ']') - line - 1);
-		category[strchr(line, ']') - line - 1] = '\0';
-
 		config_t init;
-		init.get_category = strdup(category);
+
+		init.get_category = strdup(line + 1);
+		init.get_category[strlen(init.get_category) - 1] = '\0';
 		init.get_key = NULL;
 		init.get_value = NULL;
 
@@ -129,11 +125,11 @@ static config_t tokenize(char *line)
 		x++;
 	}
 
-	value[y] = '\0'; // Null-terminate modified value
+	value[y] = '\0';
 
 	config_t init;
 
-	init.get_category = NULL;
+	init.get_category = strdup(current_category);
 	init.get_key = strdup(key);
 	init.get_value = strdup(value);
 
@@ -187,7 +183,6 @@ int config_validate(const char *filename, unsigned int verbose)
 			fprintf(stderr, "config_validate: File %s does not exist\n",
 					filename);
 		}
-
 		return -1;
 	}
 
@@ -198,7 +193,6 @@ int config_validate(const char *filename, unsigned int verbose)
 			fprintf(stderr, "\nconfig_validate: File %s cannot be handled\n",
 					filename);
 		}
-
 		return -1;
 	}
 
@@ -233,8 +227,8 @@ int config_validate(const char *filename, unsigned int verbose)
 			if (verbose == 1)
 				printf("\nconfig_validate: This line is too long: %.20s..\n",
 					   buff);
-
 			err++;
+
 			break;
 		}
 
@@ -249,7 +243,6 @@ int config_validate(const char *filename, unsigned int verbose)
 				if (verbose == 1)
 					printf("\nconfig_validate: Only '#' is allowed to mark a "
 						   "comment\n");
-
 				err++;
 				break;
 			}
@@ -283,27 +276,21 @@ char *config_get_value(config_t *session, const char *category,
 					   const char *entry, int count)
 {
 	char *value = NULL;
-	int hit = 0;
 
 	for (int iter = 0; iter < count; iter++)
 	{
 		// Make sure the value will be extracted from the correct category
 		if (category != NULL && session[iter].get_category != NULL &&
-			strcmp(session[iter].get_category, category) != 0)
-			continue;
-
-		// Get the value of the specific key
-		if (session[iter].get_key != NULL &&
-			strcmp(session[iter].get_key, entry) == 0)
+			strcmp(session[iter].get_category, category) == 0)
 		{
-			value = session[iter].get_value;
-			hit++;
-			break;
+			// Get the value of the specific key
+			if (session[iter].get_key != NULL &&
+				strcmp(session[iter].get_key, entry) == 0)
+			{
+				value = session[iter].get_value;
+			}
 		}
 	}
-
-	if (hit == 0)
-		return NULL;
 
 	return value;
 }
@@ -347,6 +334,7 @@ config_t *config_init(const char *filename, int *count)
 
 	int storage_count = 0; // Counter for the number of stored configurations
 	char buff[GENBUFF];	   // Buffer to read each line from the file
+	char current_category[GENBUFF] = "";
 
 	while (fgets(buff, GENBUFF, fp) != NULL)
 	{
@@ -356,10 +344,19 @@ config_t *config_init(const char *filename, int *count)
 
 		// Ensure buff is properly null-terminated
 		buff[strcspn(buff, "\n")] = '\0';
-		// Tokenize the line and store the result in the storage array
-		storage[storage_count] = tokenize(buff);
 
-		storage_count++;
+		if (buff[0] == '[' && strchr(buff, ']') != NULL)
+		{
+			// Extract the value of the current category
+			strncpy(current_category, buff + 1, strchr(buff, ']') - buff - 1);
+			current_category[strchr(buff, ']') - buff - 1] = '\0';
+		}
+		else
+		{
+			// Tokenize current entry in key and value
+			config_t config_entry = tokenize(buff, current_category);
+			storage[storage_count++] = config_entry;
+		}
 	}
 
 	fclose(fp);
