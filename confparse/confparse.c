@@ -1,11 +1,11 @@
 #include "confparse.h"
 
 /*
- * confparse - small config file parser library, v1.0.6
+ * confparse - small config file parser library, v1.0.7
  *
  * The confparse project facilitates the process of parsing a configuration
  * file into keys and their corresponding values. These pairs can be handled
- * individually, allowing for easy reading of configuration files. Currently,
+ * individually, allowing for easy reading and manipulating of configuration files. Currently,
  * this project supports up to 500 entries.
  *
  * Author: fhAnso
@@ -294,23 +294,23 @@ char *config_get_value(config_t *session, const char *category,
 	return value;
 }
 
-config_t *config_init(const char *filename, int *count)
+config_t *configparse_init(const char *filename, int *count)
 {
 	if (file_exist(filename) != 0)
 	{
-		fprintf(stderr, "config_init: File %s does not exist\n", filename);
+		fprintf(stderr, "configparse_init: File %s does not exist\n", filename);
 		exit(-1);
 	}
 
 	if (is_supported_file(filename) == 0)
 	{
-		fprintf(stderr, "config_init: Filetype not supported: %s\n", filename);
+		fprintf(stderr, "configparse_init: Filetype not supported: %s\n", filename);
 		exit(-1);
 	}
 
 	if (count_lines(filename) > GENBUFF)
 	{
-		fprintf(stderr, "config_init: File %s is too large\n", filename);
+		fprintf(stderr, "configparse_init: File %s is too large\n", filename);
 		exit(-1);
 	}
 
@@ -318,7 +318,7 @@ config_t *config_init(const char *filename, int *count)
 
 	if (fp == NULL)
 	{
-		fprintf(stderr, "configinit: Unable to open stream for %s\n", filename);
+		fprintf(stderr, "configparse_init: Unable to open stream for %s\n", filename);
 		exit(-1);
 	}
 
@@ -327,7 +327,7 @@ config_t *config_init(const char *filename, int *count)
 
 	if (storage == NULL)
 	{
-		fprintf(stderr, "configinit: malloc: %s\n", strerror(errno));
+		fprintf(stderr, "configparse_init: malloc: %s\n", strerror(errno));
 		exit(-1);
 	}
 
@@ -365,7 +365,7 @@ config_t *config_init(const char *filename, int *count)
 	return storage;
 }
 
-void config_cleanup(config_t *storage, int count)
+void configparse_cleanup(config_t *storage, int count)
 {
 	for (int idx = 0; idx < count; idx++)
 	{

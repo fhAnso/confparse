@@ -1,9 +1,9 @@
 /*
- * confparse - small config file parser library, v1.0.6
+ * confparse - small config file parser library, v1.0.7
  *
  * The confparse project facilitates the process of parsing a configuration
  * file into keys and their corresponding values. These pairs can be handled
- * individually, allowing for easy reading of configuration files. Currently,
+ * individually, allowing for easy reading and manipulating of configuration files. Currently,
  * this project supports up to 500 entries.
  *
  * Author: fhAnso
@@ -32,10 +32,10 @@ struct settings
 
 typedef struct settings config_t;
 
-config_t *config_init(const char *filename, int *count);
+config_t *configparse_init(const char *filename, int *count);
 int config_validate(const char *filename, unsigned int verbose);
 char *config_get_value(config_t *session, const char *category,
 					   const char *entry, int count);
-void config_cleanup(config_t *storage, int count);
+void configparse_cleanup(config_t *storage, int count);
 
 #endif

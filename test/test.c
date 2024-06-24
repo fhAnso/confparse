@@ -8,7 +8,7 @@ int main(void)
 	if (check != 1) puts("OK");
 
     int count;
-    config_t *config = config_init(config_file, &count); // Initialise session
+    config_t *config = configparse_init(config_file, &count); // Initialise session
 
     if (config == NULL) 
     {
@@ -28,7 +28,7 @@ int main(void)
         printf("Entry %s not found in %s\n", entry, category);
 
     // Free allocated ressources
-    config_cleanup(config, count);
+    configparse_cleanup(config, count);
 
     return 0;
 }
