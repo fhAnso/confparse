@@ -1,34 +1,55 @@
 #include "../confparse/confparse.h"
+#include "../confparse/confwrite.h"
 
-int main(void) 
+int main(void)
 {
-    const char *config_file = "test.ini";
-    int check = config_validate(config_file, 0); // Validate the config file structure
+	char *config_file = "test.ini";
+    // Validate the config file structure
+	int check = config_validate(config_file, 0); 
 
-	if (check != 1) puts("OK");
+	if (check != 1)
+		puts("OK");
 
-    int count;
-    config_t *config = configparse_init(config_file, &count); // Initialise session
+	FILE *writer = configwrite_init(config_file);
 
-    if (config == NULL) 
-    {
-        fprintf(stderr, "Failed to initialize session\n");
-        return 1;
-    }
+	if (writer == NULL)
+	{
+		fprintf(stderr, "Failed to initialize configwrite session\n");
+		return 1;
+	}
 
-    const char *category = "Client";
-    const char *entry = "ip";
-    
-    // Specify the category and key to parse the file and extract a specific value 
-    char *value = config_get_value(config, category, entry, count);
+	int set_value = config_set_value(writer, "Client", "port", "1112");
 
-    if (value != NULL) 
-        printf("category: %s, entry: %s, value: %s\n", category, entry, value);
-    else 
-        printf("Entry %s not found in %s\n", entry, category);
+	if (set_value == 0)
+		puts("Value updated");
+	else
+		printf("config_set_value returns: %d\n", set_value);
 
-    // Free allocated ressources
-    configparse_cleanup(config, count);
+	int count;
+    // Initialise session
+	config_t *config = configparse_init(config_file, &count); 
 
-    return 0;
+	if (config == NULL)
+	{
+		fprintf(stderr, "Failed to initialize configparse session\n");
+		return 1;
+	}
+
+	const char *category = "Client";
+	const char *entry = "ip";
+
+	// Specify the category and key to parse the file and extract a specific
+	// value
+	char *value = config_get_value(config, category, entry, count);
+
+	if (value != NULL)
+		printf("category: %s, entry: %s, value: %s\n", category, entry, value);
+	else
+		printf("Entry %s not found in %s\n", entry, category);
+
+	// Free allocated ressources
+	configparse_cleanup(config, count);
+	configwrite_cleanup(writer);
+
+	return 0;
 }

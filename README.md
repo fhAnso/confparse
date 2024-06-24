@@ -11,10 +11,11 @@ The confparse project facilitates the process of parsing a configuration file in
 
 - Function overview
 ```C
+/* --- confparse */
 // Validate config file
 int config_validate(const char *filename, unsigned int verbose);
 
-// Load the config file and define the number of entries
+// Load the config file and initialize entry pool
 config_t *configparse_init(const char *filename, int *count);
 
 // Extract the value of a specific key
@@ -22,6 +23,16 @@ char *config_get_value(config_t *session, const char *category, const char *entr
 
 // Free memory allocated by the config_init function
 void configparse_cleanup(config_t *storage, int count);
+
+/* --- confwrite */
+// Load the config file and open main stream
+FILE *configwrite_init(char *filename);
+
+// Set a new value of a specific key or replace the current
+int config_set_value(FILE *fp, const char *category, const char *key, const char *value);
+
+// Cleanup
+void configwrite_cleanup(FILE *fp);
 ```
 
 #### Details:
@@ -79,7 +90,48 @@ Parameters:
 
 Description:
 
-`config_init` will allocate memory for the current structure and returns a pointer to it. This `needs to be freed` and the config_cleanup function is used to free the previous allocated ressources when there is no need anymore.
+`configparse_init` will allocate memory for the current structure and returns a pointer to it. This `needs to be freed` and the config_cleanup function is used to free the previous allocated ressources when there is no need anymore.
+
+`configwrite_init`
+
+Parameters:
+- `filename`: config file
+
+Description:
+
+Like configparse_init, the configwrite_init function also performs some basic checks to `validate` the `structure` of the given config file and `opens a stream` if the tests are passed. 
+
+Return value:
+
+configparse_init returns a `pointer` to the main file object. If the function fails to 
+open a stream, NULL is returned.
+
+`config_set_value`
+
+Parameters:
+- `fp`: pointer to file object (stream opened by configwrite_init)
+- `category`: config category
+- `key`: config key
+- `value`: new value for key
+
+Description:
+
+This function opens a secondary stream for a temporary file to which the updated entries are 
+written. The temporary file is then renamed to the actual file name of the configuration.
+
+Return value:
+
+If the value of a specific key was set successfully, config_set_value returns 0. Otherwise 
+it will return -1.
+
+`configwrite_cleanup` 
+
+Parameters:
+- `fp`: pointer to file object
+
+Description:
+
+This is the cleanup function for confwrite. Currently it is basically only closing the file stream. This can also be done by simply use `fclose` directly.
 
 ### Example
 `test.ini`:
@@ -98,44 +150,66 @@ OS = "Windows"
 `test.c`:
 ```C
 #include "../confparse/confparse.h"
+#include "../confparse/confwrite.h"
 
-int main(void) 
+int main(void)
 {
-    const char *config_file = "test.ini";
-    int check = config_validate(config_file, 0); // Validate the config file structure
+	char *config_file = "test.ini";
+    // Validate the config file structure
+	int check = config_validate(config_file, 0); 
 
-	if (check != 1) puts("OK");
+	if (check != 1)
+		puts("OK");
 
-    int count;
-    config_t *config = configparse_init(config_file, &count); // Initialise session
+	FILE *writer = configwrite_init(config_file);
 
-    if (config == NULL) 
-    {
-        fprintf(stderr, "Failed to initialize session\n");
-        return 1;
-    }
+	if (writer == NULL)
+	{
+		fprintf(stderr, "Failed to initialize configwrite session\n");
+		return 1;
+	}
 
-    const char *category = "Client";
-    const char *entry = "ip";
-    
-    // Specify the category and key to parse the file and extract a specific value 
-    char *value = config_get_value(config, category, entry, count);
+	int set_value = config_set_value(writer, "Client", "port", "1112");
 
-    if (value != NULL) 
-        printf("category: %s, entry: %s, value: %s\n", category, entry, value);
-    else 
-        printf("Entry %s not found in %s\n", entry, category);
+	if (set_value == 0)
+		puts("Value updated");
+	else
+		printf("config_set_value returns: %d\n", set_value);
 
-    // Free allocated ressources
-    configparse_cleanup(config, count);
+	int count;
+    // Initialise session
+	config_t *config = configparse_init(config_file, &count); 
 
-    return 0;
+	if (config == NULL)
+	{
+		fprintf(stderr, "Failed to initialize configparse session\n");
+		return 1;
+	}
+
+	const char *category = "Client";
+	const char *entry = "ip";
+
+	// Specify the category and key to parse the file and extract a specific
+	// value
+	char *value = config_get_value(config, category, entry, count);
+
+	if (value != NULL)
+		printf("category: %s, entry: %s, value: %s\n", category, entry, value);
+	else
+		printf("Entry %s not found in %s\n", entry, category);
+
+	// Free allocated ressources
+	configparse_cleanup(config, count);
+	configwrite_cleanup(writer);
+
+	return 0;
 }
 ```
 
 `Testfile output`:
 ```
 OK
+Value updated
 category: Client, entry: ip, value: 127.0.0.1
 ```
 

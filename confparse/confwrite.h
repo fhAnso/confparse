@@ -16,10 +16,15 @@
 
 #include "confparse.h"
 
-FILE *configwrite_init(const char *filename);
-int config_set_value(FILE *fp, const char *value);
+#include <stdio.h>
+#include <string.h>
+#include <string.h>
 
+FILE *configwrite_init(char *filename);
+int config_set_value(FILE *fp, const char *category, 
+						const char *key, const char *value);
 
 void config_build_config(const char *filename);
+void configwrite_cleanup(FILE *fp);
 
 #endif
