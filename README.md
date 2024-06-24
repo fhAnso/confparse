@@ -15,13 +15,13 @@ The confparse project facilitates the process of parsing a configuration file in
 int config_validate(const char *filename, unsigned int verbose);
 
 // Load the config file and define the number of entries
-config_t *config_init(const char *filename, int *count);
+config_t *configparse_init(const char *filename, int *count);
 
 // Extract the value of a specific key
 char *config_get_value(config_t *session, const char *category, const char *entry, int count);
 
 // Free memory allocated by the config_init function
-void config_cleanup(config_t *storage, int count);
+void configparse_cleanup(config_t *storage, int count);
 ```
 
 #### Details:
@@ -107,7 +107,7 @@ int main(void)
 	if (check != 1) puts("OK");
 
     int count;
-    config_t *config = config_init(config_file, &count); // Initialise session
+    config_t *config = configparse_init(config_file, &count); // Initialise session
 
     if (config == NULL) 
     {
@@ -127,7 +127,7 @@ int main(void)
         printf("Entry %s not found in %s\n", entry, category);
 
     // Free allocated ressources
-    config_cleanup(config, count);
+    configparse_cleanup(config, count);
 
     return 0;
 }
