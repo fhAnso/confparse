@@ -39,7 +39,7 @@ Return value:
 
 configvalidate will return `-1` when any check fails and `0` when no failures where detected.
 
-`config_init`
+`configparse_init`
 
 Parameters:
 - `filename`: config file
@@ -71,7 +71,7 @@ Return value:
 
 If the call fails, config_get_value returns NULL. Otherwise, the value of the specified entry is returned.
 
-`config_cleanup`
+`configparse_cleanup`
 
 Parameters:
 - `storage`: entry pool
