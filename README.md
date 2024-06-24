@@ -139,6 +139,12 @@ OK
 category: Client, entry: ip, value: 127.0.0.1
 ```
 
+### TODO
+- [ ] Dynamically manipulate category, key or value
+- [ ] Function for backing up the config file
+- [ ] Automatically create and setup a new config file
+- [ ] ...
+
 ### License
 
 The confparse project has been released under the [MIT](https://github.com/fhAnso/confparse/blob/main/LICENSE) License.
