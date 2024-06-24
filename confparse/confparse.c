@@ -45,6 +45,7 @@ static int count_lines(const char *filename)
 static void remove_space(char *str)
 {
 	char *src = str, *dest = str;
+
 	while (*src != '\0')
 	{
 		if (*src != ' ')
@@ -57,7 +58,6 @@ static void remove_space(char *str)
 		src++;
 	}
 
-	// Null-terminate the resulting string
 	*dest = '\0';
 }
 
@@ -218,10 +218,9 @@ int config_validate(const char *filename, unsigned int verbose)
 	{
 		size_t line_length = strlen(buff);
 
-		// Remove the newline character if it exists
+		// Remove the newline character of current line if it exists
 		if (line_length > 0 && buff[line_length - 1] == '\n')
 			line_length--;
-		// Check if the line length exceeds the maximum buffer
 		if (line_length > GENBUFF)
 		{
 			if (verbose == 1)
@@ -342,7 +341,6 @@ config_t *config_init(const char *filename, int *count)
 		if (isspace((unsigned char)*buff) || buff[0] == '#')
 			continue;
 
-		// Ensure buff is properly null-terminated
 		buff[strcspn(buff, "\n")] = '\0';
 
 		if (buff[0] == '[' && strchr(buff, ']') != NULL)
