@@ -32,6 +32,10 @@ struct settings
 
 typedef struct settings config_t;
 
+int count_lines(const char *filename);
+int file_exist(const char *filename);
+unsigned int is_supported_file(const char *filename);
+
 config_t *configparse_init(const char *filename, int *count);
 int config_validate(const char *filename, unsigned int verbose);
 char *config_get_value(config_t *session, const char *category,

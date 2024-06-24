@@ -13,7 +13,7 @@
  * GitHub Repository: https://github.com/fhAnso/confparse
  */
 
-static int count_lines(const char *filename)
+int count_lines(const char *filename)
 {
 	int counter = 0;
 	char buff[GENBUFF];
@@ -136,9 +136,9 @@ static config_t tokenize(char *line, const char *current_category)
 	return init;
 }
 
-static int file_exist(const char *filename) { return access(filename, F_OK); }
+int file_exist(const char *filename) { return access(filename, F_OK); }
 
-static unsigned int is_supported_file(const char *filename)
+unsigned int is_supported_file(const char *filename)
 {
 	// Define accepted file types
 	const char *exts[] = {".txt", ".conf", ".ini", ".cfg"};
