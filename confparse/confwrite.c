@@ -117,7 +117,7 @@ int config_set_value(FILE *fp, const char *category, const char *key,
 			{
 				size_t key_len = strlen(key);
 
-                // Update entry: write to temp file
+				// Update entry: write to temp file
 				if (strncmp(buff, key, key_len) == 0 &&
 					(buff[key_len] == ' ' || buff[key_len] == '='))
 				{
@@ -128,26 +128,23 @@ int config_set_value(FILE *fp, const char *category, const char *key,
 			}
 		}
 
-        // No match, write line unchanged to temp file
+		// No match, write line unchanged to temp file
 		fprintf(temp_fp, "%s\n", buff);
 	}
 
 	if (key_found == 0)
-    {
-        remove(temp_filename);
-        return -1;
-    }
+	{
+		remove(temp_filename);
+		return -1;
+	}
 
 	free(buff);
 	fclose(temp_fp);
 
-    // Temp file will be renamed to main config file
+	// Temp file will be renamed to main config file
 	rename(temp_filename, config_filename);
 
 	return 0;
 }
 
-void configwrite_cleanup(FILE *fp) 
-{ 
-    fclose(fp); 
-}
+void configwrite_cleanup(FILE *fp) { fclose(fp); }
